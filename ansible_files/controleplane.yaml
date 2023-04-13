@@ -1,27 +1,27 @@
-- hosts: controlplane
-  become: true
-  tasks:
-    - name: inicializando o cluster
-      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU,Mem >> cluster_initialized.txt
-      args:
-        chdir: $HOME
-    
-    - name: criando .kube
-      become_user: ubuntu
-      file:
-        path: $HOME/.kube
-        state: directory
-        mode: 0755
-    
-    - name: copiando config
-      copy:
-        src: /etc/kubernetes/admin.conf
-        dest: /home/ubuntu/.kube/config
-        remote_src: yes
-        owner: ubuntu
+- hosts: controlplane # Define o host
+  become: true # Define que as tarefas serão executadas como adm
+  tasks: # Define a lista de tarefas que serão executadas
+    - name: inicializando o cluster # Define o nome da tarefa
+      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=NumCPU,Mem >> cluster_initialized.txt # Executa o comando de inicialização
+      args: # Define os argumentos adicionais para a tarefa
+        chdir: $HOME # Define o diretório em que o comando deve ser executado
 
-    - name: habilitando plugin CNI
-      become_user: ubuntu
-      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml >> pod_network_setup.txt
-      args:
-        chdir: $HOME
+    - name: criando .kube # Define o nome da próxima tarefa
+      become_user: ubuntu # Define que a tarefa deve ser executada com o usuário ubuntu
+      file: # Define o comando para criar um diretório
+        path: $HOME/.kube # Define o caminho para o diretório que será criado
+        state: directory # Define que o comando deve criar um diretório
+        mode: 0755 # Define as permissões do diretório que será criado
+
+    - name: copiando config # Define o nome da próxima tarefa
+      copy: # Define o comando para copiar um arquivo
+        src: /etc/kubernetes/admin.conf # Define o caminho do arquivo que será copiado
+        dest: /home/ubuntu/.kube/config # Define o caminho de destino para o arquivo que será copiado
+        remote_src: yes # Define que o arquivo de origem está no servidor remoto
+        owner: ubuntu # Define o proprietário do arquivo que será copiado
+
+    - name: habilitando plugin CNI # Define o nome da próxima tarefa
+      become_user: ubuntu # Define que a tarefa deve ser executada com o usuário ubuntu
+      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml >> pod_network_setup.txt # Executa o comando para habilitar o plugin, e redireciona a saída para um arquivo
+      args: # Define os argumentos adicionais para a tarefa
+        chdir: $HOME # Define o diretório em que o comando deve ser executado
