@@ -1,20 +1,30 @@
+# Essa tarefa é descrita como 'all' e é listada
+# como será executada de forma sequencial.
 - hosts: all
+  # become permite a execução de tarefas com privilégios de um superusuário
   become: true
   tasks:
+    # essa tarefa é responsável por alterar o nome do host remoto usando o módulo 'hostname'
     - name: qualquer coisa pra dizer qual eh a tafera que esta sendo executada, agora sera o alterar nome
       hostname:
         name: "{{ new_hostname }}"
 
+    # essa tarefa é responsável por adicionar a chave GPG do docker ao repo de chaves do sistema
+    # utilizando o apt_key
     - name: adicionar GPG do docker
       apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
 
+    # essa tarefa é responsável por adicionar o repo do docker ao gerenciamento de pacotes
+    # apt_repository, assim como descreve a url do repositório
     - name: adicionar repo do docker
       apt_repository:
         repo: deb https://download.docker.com/linux/ubuntu bionic stable
         state: present
 
+    # essa tarefa é responsável por instalar o docker utilizando o comando apt do ansible
+    # e especifica os pacotes a serem instalados através do loop
     - name: instalar o docker
       apt:
         name: "{{ item }}"
@@ -25,9 +35,13 @@
         - docker-ce-cli
         - containerd.io
 
+    #  essa tarefa é responsável por criar um diretório de configuração do docker,
+    # utilizando o comando file do ansible, o qual define o diretório /etc/docker
     - name: criando diretorio da config do docker
       file: path=/etc/docker state=directory
 
+    # essa tarefa é responsável por usar o systemd como gerenciador do cgroups. Assim, é copiado
+    # para o diretório definido acima e definindo o conteúdo do arquivo como '{"exec-opts": ["native.cgroupdriver=systemd"]}'
     - name: alterando driver do docker
       copy:
         dest: "/etc/docker/daemon.json"
@@ -36,32 +50,44 @@
           "exec-opts": ["native.cgroupdriver=systemd"]
           }
 
+    # essa tarefa é responsável por adicionar o usuário do ubunto ao grupo docker,
+    #utilizando o módulo user do ansible
     - name: adicionar User no grupode Docker
       user:
         name: ubuntu
         group: docker
 
+    # essa tarefa, através do apt do ansible, é responsável por instalar o pacote apt-transport-https e
+    # o estado de instalação é definido como "present"
     - name: adicionar APT Transport HTTPS
       apt:
         name: apt-transport-https
         state: present
 
+    # essa tarefa adiciona o gpg do kubernets ao repo de chaves do usuário, utilizando
+    # o módulo do ansible apt_key, bem como a url responsável da chave
     - name: adicionar GPG do k8s
       apt_key:
         url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
         state: present
 
+    # essa tarefa adiciona o repositório do Kubernetes ao arquivo de configuração
+    # do gerenciador de pacotes usando o módulo apt_repository  do ansible, bem como o link referente
     - name: adicionar repo do k8s
       apt_repository:
         repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
         state: present
 
+    # novamente, utilizando o módulo apt do ansible, é instalado o pacote  kubelet=1.22.4-00
+    # com a opção de update_cache, o que atualiza o cache do apt antes de instalar o pacote.
     - name: instalando o kubelet
       apt:
         name: kubelet=1.22.4-00
         state: present
         update_cache: true
 
+    # da mesma forma, há também a instalação do pacote kubeadm, responsável por um caminho
+    # da criação do cluster
     - name: instalando o kubeadm
       apt:
         name: kubeadm=1.22.4-00
@@ -69,8 +95,12 @@
         update_cache: true
 
 - hosts: controlplane
+  # become permite a execução de tarefas com privilégios de um superusuário
   become: true
   tasks:
+    # esse bloco de tarefas pelo playbook do ansible é responsável pela instalação do pacote e
+    #  A opção "state: present" indica que o pacote deve ser instalado, caso ainda não esteja instalado no host.
+    # a opção force: true é reponsável por instalar o pacote mesmo que ele já tenha sido instalado
     - name: instalando o kubectl
       apt:
         name: kubectl=1.22.4-00
