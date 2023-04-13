@@ -1,3 +1,8 @@
+# cada bloco "resource" define a criação de um security group incluindo o destino dos seus usos e suas especificações, de acordo com o uso pretendido da instância que será gerada contendo o security group
+# abaixo temos a definição de 3 sg's para, respectivamente:
+## permitir o uso de ssh na instância
+## permitir a conexão externa via ssh
+## liberar o acesso da instância à internet via protocolo tcp
 resource "aws_security_group" "acesso_total_local" {
   vpc_id      = var.vpc_id
   description = "liberacao de SSH para rede da VPC"
