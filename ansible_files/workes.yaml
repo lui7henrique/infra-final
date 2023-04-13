@@ -1,28 +1,54 @@
+# Especificação em qual grupo de hosts as tarefas serão executadas.
+# Há duas tarefa. A primeira é descrita como 'controlplane' e é listado
+# as tasks de como será executada de forma sequencial.
+
 - hosts: controlplane
+  # become permite a execução de tarefas com privilégios de um superusuário
   become: true
   tasks:
+    # descrição da tarefa pelo name
     - name: criando token para entrar no cluster
+      # o shell permite executar comandos através da linha de comando,
+      # sendo que esse comando é responsável por criar um token de entrada no cluster Kubernetes
       shell: kubeadm token create --print-join-command
+      # register é um argumento do módulo shell que permite que o resultado da execução de um comando seja armazenado em uma variável.
+      # Dessa forma, ela é reutilizada abaixo.
       register: join_command_raw
 
+    # o debug permite visualizar a mensagem de depuração. Nesse caso,a variável armazenada anteriormente
     - debug:
         msg: "{{ join_command_raw.stdout }}"
-
+    # descrição da tarefa pelo name
     - name: adicionando join command
+      # o set_fact define um valor a variável join_command_raw, que possui o comando criado acima.
+      # A expressão join_command_raw.stdout_lines[0] extrai o primeiro item na lista stdout_lines da variável join_command_raw.
       set_fact:
         join_command: "{{ join_command_raw.stdout_lines[0] }}"
 
+# Essa tarefa é descrita como 'workers' e é listada
+# como será executada de forma sequencial.
 - hosts: workers
+  # become permite a execução de tarefas com privilégios de um superusuário
   become: true
   tasks:
+    # descrição da tarefa pelo name
+    # A primeira tarefa tem como objetivo desativar a memória virtual swap por
+    # possuir algumas incompatibilidades com o uso de memória pelo disco rígido
     - name: retirar o swap
       shell: "swapoff -a"
 
+    # Essa tarefa tem como objetivo A segunda tarefa tem como objetivo juntar o host remoto a um cluster gerenciado pelo Ansible.
+    # O comando {{ hostvars['controlplane'].join_command }} é usado para executar o comando armazenado na variável join_command do host controlplane.
+    # Assim, o host remoto se une ao cluster definido na tarefa acima como "controlplane"
+    # O comando --ignore-preflight-errors all é utilizada para ignorar eventuais erros e o >> é responsável
+    # por direcionar a saída para o arquivo node_joined.txt
     - name: join cluster
       shell: "sudo {{ hostvars['controlplane'].join_command }} --ignore-preflight-errors all >> node_joined.txt"
       args:
         chdir: $HOME
       register: join_worker
-    
+
+    # como acima, essa tarefa de depuração é responsável por exibir o resultado
+    # da variável join_worker definida anteriormente
     - debug:
         msg: "{{ join_worker }}"
