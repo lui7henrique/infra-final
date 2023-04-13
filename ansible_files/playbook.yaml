@@ -1,78 +1,78 @@
 - hosts: all
   become: true
   tasks:
-  - name: qualquer coisa pra dizer qual eh a tafera que esta sendo executada, agora sera o alterar nome
-    hostname: 
-      name: '{{ new_hostname }}'
-  
-  - name: adicionar GPG do docker
-    apt_key:
-      url: https://download.docker.com/linux/ubuntu/gpg
-      state: present
+    - name: qualquer coisa pra dizer qual eh a tafera que esta sendo executada, agora sera o alterar nome
+      hostname:
+        name: "{{ new_hostname }}"
 
-  - name: adicionar repo do docker
-    apt_repository: 
-      repo: deb https://download.docker.com/linux/ubuntu bionic stable
-      state: present
+    - name: adicionar GPG do docker
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
 
-  - name: instalar o docker
-    apt: 
-      name: "{{ item }}"
-      state: latest
-      update_cache: yes
-    loop:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
+    - name: adicionar repo do docker
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
 
-  - name: criando diretorio da config do docker
-    file: path=/etc/docker state=directory
+    - name: instalar o docker
+      apt:
+        name: "{{ item }}"
+        state: latest
+        update_cache: yes
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
 
-  - name: alterando driver do docker
-    copy: 
-      dest: "/etc/docker/daemon.json"
-      content: | 
-        {
-        "exec-opts": ["native.cgroupdriver=systemd"]
-        }
+    - name: criando diretorio da config do docker
+      file: path=/etc/docker state=directory
 
-  - name: adicionar User no grupode Docker
-    user:
-      name: ubuntu
-      group: docker
+    - name: alterando driver do docker
+      copy:
+        dest: "/etc/docker/daemon.json"
+        content: |
+          {
+          "exec-opts": ["native.cgroupdriver=systemd"]
+          }
 
-  - name: adicionar APT Transport HTTPS
-    apt:
-      name: apt-transport-https
-      state: present
+    - name: adicionar User no grupode Docker
+      user:
+        name: ubuntu
+        group: docker
 
-  - name: adicionar GPG do k8s
-    apt_key:
-      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-      state: present
+    - name: adicionar APT Transport HTTPS
+      apt:
+        name: apt-transport-https
+        state: present
 
-  - name: adicionar repo do k8s
-    apt_repository: 
-      repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
-      state: present
+    - name: adicionar GPG do k8s
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
 
-  - name: instalando o kubelet
-    apt: 
-      name: kubelet=1.22.4-00
-      state: present
-      update_cache: true
+    - name: adicionar repo do k8s
+      apt_repository:
+        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
 
-  - name: instalando o kubeadm
-    apt: 
-      name: kubeadm=1.22.4-00
-      state: present
-      update_cache: true
+    - name: instalando o kubelet
+      apt:
+        name: kubelet=1.22.4-00
+        state: present
+        update_cache: true
+
+    - name: instalando o kubeadm
+      apt:
+        name: kubeadm=1.22.4-00
+        state: present
+        update_cache: true
 
 - hosts: controlplane
   become: true
   tasks:
-  - name: instalando o kubectl
-    apt: 
-      name: kubectl=1.22.4-00
-      state: present
-      force: true
+    - name: instalando o kubectl
+      apt:
+        name: kubectl=1.22.4-00
+        state: present
+        force: true
