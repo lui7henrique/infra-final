@@ -1,3 +1,4 @@
+// Aqui no primeiro bloco temos o provedor cloud e a versão que o terraform vai utilizar.
 terraform {
   required_providers {
     aws = {
@@ -7,6 +8,7 @@ terraform {
   }
 }
 
+// Aqui temos a região a ser usada dentro da aws.
 provider "aws" {
   region = var.regiao
 }
