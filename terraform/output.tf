@@ -1,3 +1,4 @@
+# arquivo usado pra definição de alertas de saída para cada operações realizadas, nesse caso todos os outputs foram criados com a finalidade de indicar os ips das instâncias assim que criadas para acesso facilitado e gestão de erros aprimorada
 output "ip_publico_k8s1" {
     description = "IPs publico kubernetes1"
   value = aws_eip.k8s1.public_ip
