@@ -1,5 +1,5 @@
-resource "aws_eip" "k8s1" {
-  instance = aws_instance.kubernetes[0].id
+resource "aws_eip" "k8s1" { # informacoes de IP elástico
+  instance = aws_instance.kubernetes[0].id #instancia associada e id de alocação do VPC EIP
   vpc      = true
 }
 
